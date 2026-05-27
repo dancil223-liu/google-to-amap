@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="轉高德">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%2334A853' width='100' height='100' rx='20'/><text x='50' y='68' text-anchor='middle' font-size='50' fill='white'>德</text></svg>">
+  <title>Google Maps → 高德地圖</title>
+  <style>
+    :root {
+      --blue: #007AFF;
+      --green: #34C759;
+      --red: #FF3B30;
+      --bg: #F2F2F7;
+      --card: #FFFFFF;
+      --text: #1C1C1E;
+      --sub: #8E8E93;
+      --radius: 14px;
+      --safe-top: env(safe-area-inset-top, 20px);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      padding: calc(var(--safe-top) + 16px) 16px 32px;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    .header p {
+      font-size: 14px;
+      color: var(--sub);
+      margin-top: 4px;
+    }
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    textarea {
+      width: 100%;
+      height: 100px;
+      border: 1.5px solid #E5E5EA;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 16px;
+      font-family: inherit;
+      resize: none;
+      outline: none;
+      background: #F9F9FB;
+      transition: border-color 0.2s;
+    }
+    textarea:focus { border-color: var(--blue); background: #fff; }
+    textarea::placeholder { color: #C7C7CC; }
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .btn {
+      flex: 1;
+      padding: 14px 8px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn:active { opacity: 0.7; transform: scale(0.97); }
+    .btn-paste { background: #E5E5EA; color: var(--text); }
+    .btn-clear { background: #E5E5EA; color: var(--red); flex: 0.4; }
+    .btn-full { width: 100%; margin-top: 8px; }
+    .btn-view { background: var(--blue); color: #fff; }
+    .btn-navi { background: var(--green); color: #fff; }
+    .btn:disabled { opacity: 0.4; pointer-events: none; }
+
+    .result {
+      display: none;
+    }
+    .result.show { display: block; }
+    .result .name {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .result .coords {
+      font-size: 13px;
+      color: var(--sub);
+      margin-top: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+    .result .actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .msg {
+      text-align: center;
+      font-size: 14px;
+      padding: 10px;
+      border-radius: 10px;
+      margin-top: 8px;
+      display: none;
+    }
+    .msg.show { display: block; }
+    .msg.error { background: #FFE5E5; color: var(--red); }
+    .msg.warn { background: #FFF3CD; color: #856404; }
+
+    .help {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-top: 16px;
+    }
+    .help summary {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--blue);
+      cursor: pointer;
+      list-style: none;
+    }
+    .help summary::before { content: ""; }
+    .help .steps {
+      margin-top: 12px;
+      font-size: 14px;
+      color: #555;
+      line-height: 1.8;
+    }
+    .help .steps strong { color: var(--text); }
+
+    .name-edit {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 8px;
+    }
+    .name-edit input {
+      flex: 1;
+      padding: 10px 12px;
+      border: 1.5px solid #E5E5EA;
+      border-radius: 10px;
+      font-size: 16px;
+      font-family: inherit;
+      outline: none;
+      background: #F9F9FB;
+    }
+    .name-edit input:focus { border-color: var(--blue); background: #fff; }
+
+    .mode-tabs {
+      display: flex;
+      background: #E5E5EA;
+      border-radius: 10px;
+      padding: 2px;
+      margin-bottom: 12px;
+    }
+    .mode-tab {
+      flex: 1;
+      padding: 8px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      background: transparent;
+      color: var(--sub);
+    }
+    .mode-tab.active {
+      background: #fff;
+      color: var(--text);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Google Maps → 高德</h1>
+    <p>貼上連結，一鍵跳轉高德地圖</p>
+  </div>
+
+  <div class="card">
+    <div class="mode-tabs">
+      <button class="mode-tab active" onclick="setMode('url')">貼連結</button>
+      <button class="mode-tab" onclick="setMode('coords')">貼座標</button>
+    </div>
+
+    <div id="urlMode">
+      <textarea id="input" placeholder="貼上 Google Maps 連結&#10;&#10;例：https://www.google.com/maps/place/台北101/@25.033..."></textarea>
+      <div class="btn-row">
+        <button class="btn btn-paste" onclick="pasteAndParse()">📋 貼上</button>
+        <button class="btn btn-clear" onclick="clearAll()">清除</button>
+      </div>
+    </div>
+
+    <div id="coordsMode" style="display:none">
+      <div class="name-edit">
+        <input id="manualName" type="text" placeholder="地點名稱（選填）">
+      </div>
+      <div class="name-edit" style="margin-top:8px">
+        <input id="manualLat" type="number" step="any" placeholder="緯度 (如 25.033)">
+        <input id="manualLon" type="number" step="any" placeholder="經度 (如 121.565)">
+      </div>
+      <button class="btn btn-view btn-full" onclick="manualOpen('view')">📍 在高德查看</button>
+      <button class="btn btn-navi btn-full" onclick="manualOpen('navi')" style="margin-top:6px">🧭 用高德導航</button>
+    </div>
+  </div>
+
+  <div class="card result" id="result">
+    <div class="name" id="rName"></div>
+    <div class="coords" id="rCoords"></div>
+    <div class="name-edit">
+      <input id="editName" type="text" placeholder="修改名稱">
+      <button class="btn btn-paste" style="flex:0 0 auto; padding:10px 14px; font-size:14px" onclick="updateName()">更新</button>
+    </div>
+    <div class="actions">
+      <button class="btn btn-view" onclick="openAmap('view')">📍 查看地圖</button>
+      <button class="btn btn-navi" onclick="openAmap('navi')">🧭 開始導航</button>
+    </div>
+  </div>
+
+  <div class="msg" id="msg"></div>
+
+  <details class="help">
+    <summary>使用說明</summary>
+    <div class="steps">
+      <strong>方法一：貼連結（推薦）</strong><br>
+      1. 打開 Google Maps（Safari 或 APP）<br>
+      2. 找到地點，複製網址列的完整連結<br>
+      3. 回到這裡，點「貼上」<br>
+      4. 選擇「查看地圖」或「開始導航」<br>
+      <br>
+      <strong>方法二：貼座標</strong><br>
+      1. 在 Google Maps 長按地圖上的點<br>
+      2. 點擊最上方出現的座標 → 自動複製<br>
+      3. 切換到「貼座標」模式<br>
+      4. 輸入座標和名稱<br>
+      <br>
+      <strong>⚠️ 注意</strong><br>
+      · 短網址（goo.gl 開頭）無法直接解析<br>
+      · 請從瀏覽器網址列複製完整連結<br>
+      · 或在 Google Maps APP 長按座標複製<br>
+      · 需要已安裝高德地圖 APP
+    </div>
+  </details>
+
+  <script>
+    let parsed = null;
+
+    function setMode(mode) {
+      document.querySelectorAll('.mode-tab').forEach((t, i) => {
+        t.classList.toggle('active', (mode === 'url' && i === 0) || (mode === 'coords' && i === 1));
+      });
+      document.getElementById('urlMode').style.display = mode === 'url' ? 'block' : 'none';
+      document.getElementById('coordsMode').style.display = mode === 'coords' ? 'block' : 'none';
+      clearAll();
+    }
+
+    function showMsg(text, type) {
+      const el = document.getElementById('msg');
+      el.textContent = text;
+      el.className = 'msg show ' + type;
+    }
+    function hideMsg() {
+      document.getElementById('msg').className = 'msg';
+    }
+
+    async function pasteAndParse() {
+      hideMsg();
+      try {
+        const text = await navigator.clipboard.readText();
+        document.getElementById('input').value = text;
+        parseInput(text);
+      } catch {
+        showMsg('無法讀取剪貼簿，請手動貼上後按 Enter', 'warn');
+      }
+    }
+
+    document.getElementById('input').addEventListener('input', function () {
+      parseInput(this.value);
+    });
+
+    function parseInput(text) {
+      hideMsg();
+      document.getElementById('result').classList.remove('show');
+      parsed = null;
+      if (!text.trim()) return;
+
+      let lat, lon, name;
+
+      // Format: /place/NAME/@LAT,LON
+      let m = text.match(/\/place\/([^\/]+)\/@(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+      if (m) {
+        name = decodeURIComponent(m[1].replace(/\+/g, ' '));
+        lat = parseFloat(m[2]);
+        lon = parseFloat(m[3]);
+      }
+
+      // Format: /search/QUERY/@LAT,LON
+      if (!lat) {
+        m = text.match(/\/search\/([^\/]+)\/@(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+        if (m) {
+          name = decodeURIComponent(m[1].replace(/\+/g, ' '));
+          lat = parseFloat(m[2]);
+          lon = parseFloat(m[3]);
+        }
+      }
+
+      // Format: @LAT,LON (general)
+      if (!lat) {
+        m = text.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+        if (m) { lat = parseFloat(m[1]); lon = parseFloat(m[2]); }
+      }
+
+      // Format: ?q=LAT,LON
+      if (!lat) {
+        m = text.match(/[?&]q=(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+        if (m) { lat = parseFloat(m[1]); lon = parseFloat(m[2]); }
+      }
+
+      // Format: just coordinates "25.033, 121.565"
+      if (!lat) {
+        m = text.match(/(-?\d+\.?\d*)\s*[,，]\s*(-?\d+\.?\d*)/);
+        if (m) {
+          const a = parseFloat(m[1]), b = parseFloat(m[2]);
+          if (a >= -90 && a <= 90 && b >= -180 && b <= 180) { lat = a; lon = b; }
+        }
+      }
+
+      // Extract name from shared text (first line before URL)
+      if (!name) {
+        const lines = text.trim().split(/\n/);
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (trimmed && !trimmed.startsWith('http') && !trimmed.match(/^-?\d/)) {
+            name = trimmed;
+            break;
+          }
+        }
+      }
+
+      // Check short URL
+      if (!lat && (text.includes('goo.gl') || text.includes('maps.app'))) {
+        showMsg('偵測到短網址，無法直接解析。請從 Google Maps 網址列複製完整連結，或切換到「貼座標」模式。', 'warn');
+        return;
+      }
+
+      if (!lat || !lon || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+        showMsg('無法從輸入中解析出座標，請確認是 Google Maps 完整連結', 'error');
+        return;
+      }
+
+      if (!name) name = 'Google Maps';
+
+      parsed = { lat, lon, name };
+      document.getElementById('rName').textContent = name;
+      document.getElementById('rCoords').textContent = lat.toFixed(6) + ', ' + lon.toFixed(6);
+      document.getElementById('editName').value = name;
+      document.getElementById('result').classList.add('show');
+    }
+
+    function updateName() {
+      const newName = document.getElementById('editName').value.trim();
+      if (newName && parsed) {
+        parsed.name = newName;
+        document.getElementById('rName').textContent = newName;
+      }
+    }
+
+    function openAmap(mode) {
+      if (!parsed) return;
+      const { lat, lon, name } = parsed;
+      const n = encodeURIComponent(name);
+      let url;
+      if (mode === 'view') {
+        url = 'iosamap://viewMap?sourceApplication=googleToAmap&poiname=' + n + '&lat=' + lat + '&lon=' + lon + '&dev=1';
+      } else {
+        url = 'iosamap://navi?sourceApplication=googleToAmap&poiname=' + n + '&lat=' + lat + '&lon=' + lon + '&dev=1&style=0';
+      }
+      window.location.href = url;
+      setTimeout(function () {
+        showMsg('無法開啟高德地圖，請確認已安裝高德地圖 APP', 'error');
+      }, 2500);
+    }
+
+    function manualOpen(mode) {
+      const lat = parseFloat(document.getElementById('manualLat').value);
+      const lon = parseFloat(document.getElementById('manualLon').value);
+      const name = document.getElementById('manualName').value.trim() || 'Google Maps';
+      if (isNaN(lat) || isNaN(lon)) {
+        showMsg('請輸入有效的經緯度', 'error');
+        return;
+      }
+      if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+        showMsg('座標超出範圍', 'error');
+        return;
+      }
+      parsed = { lat, lon, name };
+      openAmap(mode);
+    }
+
+    function clearAll() {
+      document.getElementById('input').value = '';
+      document.getElementById('result').classList.remove('show');
+      document.getElementById('manualName').value = '';
+      document.getElementById('manualLat').value = '';
+      document.getElementById('manualLon').value = '';
+      hideMsg();
+      parsed = null;
+    }
+
+    // Auto-redirect mode: iOS Shortcut passes ?url=EXPANDED_URL&name=NAME&mode=view|navi
+    (function autoRedirect() {
+      var params = new URLSearchParams(window.location.search);
+      var url = params.get('url');
+      if (!url) return;
+
+      var name = params.get('name') || '';
+      var mode = params.get('mode') || 'navi';
+
+      parseInput(decodeURIComponent(url));
+
+      if (parsed) {
+        if (name) parsed.name = decodeURIComponent(name);
+        document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100dvh;flex-direction:column;gap:12px"><div style="font-size:24px;font-weight:700">正在開啟高德地圖...</div><div style="color:#8E8E93">' + parsed.name + '</div></div>';
+        setTimeout(function() { openAmap(mode); }, 300);
+      }
+    })();
+  </script>
+</body>
+</html>
