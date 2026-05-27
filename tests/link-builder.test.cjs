@@ -89,5 +89,7 @@ assert.ok(html.includes('高德網頁導航'), 'desktop web navigation button sh
 assert.ok(html.includes('展開 URL'), 'shortcut setup steps should mention Expand URL');
 assert.ok(html.includes('不用捷徑'), 'mobile fallback should avoid requiring Shortcuts');
 assert.ok(html.includes('文字動作'), 'shortcut setup should explain the Text action');
+assert.ok(html.includes('autoOpenShortcutTarget'), 'shortcut hash page should auto-attempt opening Amap');
+assert.ok(html.includes('正在嘗試打開高德'), 'shortcut hash page should explain auto-open state');
 
 console.log('link-builder tests passed');

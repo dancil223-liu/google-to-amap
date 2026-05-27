@@ -21,13 +21,13 @@ Google Maps 連結轉高德地圖的小工具，主要給 iPhone 捷徑流程使
 - 新增 `tests/link-builder.test.cjs` 驗證高德連結格式。
 - 2026-05-27 晚間修正電腦操作沒反應：非 iOS 會改開高德網頁版；頁面新增「解析」按鈕、電腦測試按鈕、iPhone 捷徑 4 步驟說明。
 - 2026-05-27 再修正：電腦版「查看地圖 / 高德網頁導航」改用新分頁；手機說明改成「不用捷徑」優先，捷徑版改用「文字動作」組網址，避免打開回 Google Maps。
+- 2026-05-27 捷徑 hash 頁新增自動嘗試開高德：進頁後 300ms 自動跳 `iosamap://navi`，失敗則保留「沒有跳？按這裡」大按鈕。
 
 ## 收工狀態（2026-05-27）
 
-- 本輪功能 commit：`1e0a6f9 Open desktop Amap links in new tabs`
-- Git 狀態：功能修正已 push 到 GitHub Pages。
-- 線上測試網址：`https://dancil223-liu.github.io/google-to-amap/?v=1e0a6f9`
-- 已驗證：`node tests/link-builder.test.cjs` 通過；本機 HTTP 載入檢查通過；線上頁面已包含「不用捷徑」、「文字動作」、新分頁邏輯與舊版高德提示。
+- 上次線上 commit：`d104830 Update handoff for shortcut fallback fix`
+- 本輪自動跳轉修正待提交與 push。
+- 已驗證：`node tests/link-builder.test.cjs` 通過；本機 HTTP 載入檢查通過。
 
 ## 下一步
 

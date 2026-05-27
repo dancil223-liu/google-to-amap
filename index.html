@@ -545,6 +545,12 @@
         return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
       });
     }
+    function autoOpenShortcutTarget(url) {
+      if (!url) return;
+      setTimeout(function () {
+        window.location.href = url;
+      }, 300);
+    }
 
     function manualOpen(mode) {
       const lat = parseFloat(document.getElementById('manualLat').value);
@@ -590,12 +596,13 @@
           '<div style="display:flex;align-items:center;justify-content:center;min-height:100dvh;flex-direction:column;gap:14px;padding:20px;text-align:center">' +
             '<div style="font-size:26px;font-weight:700">' + safeName + '</div>' +
             '<div style="font-size:14px;color:#8E8E93">' + parsed.lat.toFixed(6) + ', ' + parsed.lon.toFixed(6) + '</div>' +
-            '<div style="max-width:350px;font-size:14px;color:#555;line-height:1.5">iPhone 先按第一顆。電腦請直接按最下面的網頁版，電腦不開 APP 是正常的。</div>' +
-            '<a href="' + naviApp + '" style="display:block;width:100%;max-width:350px;padding:18px;background:#34C759;color:#fff;text-align:center;border-radius:14px;font-size:20px;font-weight:700;text-decoration:none">高德 APP 導航</a>' +
+            '<div style="max-width:350px;font-size:14px;color:#555;line-height:1.5">正在嘗試打開高德。如果沒有自動跳轉，按下面第一顆。</div>' +
+            '<a href="' + naviApp + '" style="display:block;width:100%;max-width:350px;padding:18px;background:#34C759;color:#fff;text-align:center;border-radius:14px;font-size:20px;font-weight:700;text-decoration:none">沒有跳？按這裡開高德 APP 導航</a>' +
             '<a href="' + naviNativeWeb + '" style="display:block;width:100%;max-width:350px;padding:18px;background:#111827;color:#fff;text-align:center;border-radius:14px;font-size:18px;font-weight:700;text-decoration:none">官方連結開 APP</a>' +
             '<a href="' + viewApp + '" style="display:block;width:100%;max-width:350px;padding:18px;background:#007AFF;color:#fff;text-align:center;border-radius:14px;font-size:18px;font-weight:700;text-decoration:none">在高德查看</a>' +
             '<a href="' + naviWeb + '" style="display:block;width:100%;max-width:350px;padding:14px;background:#E5E5EA;color:#1C1C1E;text-align:center;border-radius:14px;font-size:16px;font-weight:700;text-decoration:none">電腦 / APP 打不開：用網頁版</a>' +
           '</div>';
+        autoOpenShortcutTarget(naviApp);
       }
     })();
   </script>
