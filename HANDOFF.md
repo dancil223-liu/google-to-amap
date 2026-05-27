@@ -20,21 +20,22 @@ Google Maps 連結轉高德地圖的小工具，主要給 iPhone 捷徑流程使
 - 2026-05-27 已改造成雙路徑：`iosamap://` 高德 APP 直開 + 高德官方 URI `callnative=1` 備援。
 - 新增 `tests/link-builder.test.cjs` 驗證高德連結格式。
 - 2026-05-27 晚間修正電腦操作沒反應：非 iOS 會改開高德網頁版；頁面新增「解析」按鈕、電腦測試按鈕、iPhone 捷徑 4 步驟說明。
+- 2026-05-27 再修正：電腦版「查看地圖 / 高德網頁導航」改用新分頁；手機說明改成「不用捷徑」優先，捷徑版改用「文字動作」組網址，避免打開回 Google Maps。
 
 ## 收工狀態（2026-05-27）
 
-- 本輪功能 commit：`ac9949c Fix desktop fallback and shortcut instructions`
-- Git 狀態：乾淨，已 push 到 GitHub Pages
-- 線上測試網址：`https://dancil223-liu.github.io/google-to-amap/?v=ac9949c`
-- 已驗證：`node tests/link-builder.test.cjs` 通過；本機 HTTP 載入檢查通過；線上頁面已包含「高德網頁導航」、`isIOS` 判斷與捷徑 4 步驟。
+- 上次線上 commit：`414063f Update handoff after Pages verification`
+- 本輪修正待提交與 push。
+- 已驗證：`node tests/link-builder.test.cjs` 通過；本機 HTTP 載入檢查通過。
 
 ## 下一步
 
-1. push 到 GitHub Pages 後，用電腦開新版網址測「貼連結 → 解析 → 高德網頁導航」。
-2. 用 iPhone 建立捷徑：分享表單 → 取得捷徑輸入 → 展開 URL → 打開 `https://dancil223-liu.github.io/google-to-amap/#` + 展開後 URL。
-3. iPhone 先測「高德 APP 導航」。
-4. 不行再測「官方連結開 APP」。
-5. 兩個都不行，再保留網頁版備援並回報手機畫面。
+1. push 到 GitHub Pages 後，用電腦開新版網址測「貼連結 → 解析 / 查看地圖 → 新分頁高德網頁」。
+2. 手機先測不用捷徑：Google Maps 分享 → 複製連結 → 回工具頁貼上 → 高德 APP 導航。
+3. 若要做捷徑：分享表單 → 展開 URL → 文字動作貼本站前綴並插入「展開的 URL」→ 打開上一個文字。
+4. iPhone 先測「高德 APP 導航」。
+5. 不行再測「官方連結開 APP」。
+6. 兩個都不行，再保留網頁版備援並回報手機畫面。
 
 ## 開工規則
 

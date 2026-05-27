@@ -175,6 +175,17 @@
       line-height: 1.7;
     }
     .step-list li { margin-bottom: 6px; }
+    .mobile-option {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 10px;
+      background: #F2F2F7;
+    }
+    .mobile-option .label {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
     .desktop-note {
       margin-top: 10px;
       padding: 10px;
@@ -265,19 +276,31 @@
   </div>
 
   <div class="card shortcut-card">
-    <div class="title">捷徑直開高德</div>
+    <div class="title">手機怎麼用</div>
     <div class="desc">
-      iPhone 不能直接匯入我這邊產生的捷徑檔，所以最穩的做法是你照下面 4 步在「捷徑」APP 裡建立一次。
+      先用不用捷徑的方法測通；要更快再做捷徑。
     </div>
-    <ol class="step-list">
-      <li>新增捷徑，打開右上角設定，開啟「在分享表單中顯示」。</li>
-      <li>第一個動作選「取得捷徑輸入」，類型選 URL。</li>
-      <li>第二個動作選「展開 URL」，輸入用「捷徑輸入」。</li>
-      <li>第三個動作選「打開 URL」，網址填：本站網址 + # + 展開後的 URL。</li>
-    </ol>
+    <div class="mobile-option">
+      <div class="label">不用捷徑</div>
+      <ol class="step-list">
+        <li>Google Maps 裡按「分享」。</li>
+        <li>選「複製連結」。</li>
+        <li>回到這個頁面，按「貼上」。</li>
+        <li>按「高德 APP 導航」或「官方連結開 APP」。</li>
+      </ol>
+    </div>
+    <div class="mobile-option">
+      <div class="label">要做捷徑</div>
+      <ol class="step-list">
+        <li>捷徑設定開啟「在分享表單中顯示」，接收 URL。</li>
+        <li>新增「展開 URL」，輸入選「捷徑輸入」。</li>
+        <li>新增「文字動作」，先貼下方固定網址，再插入變數「展開的 URL」。</li>
+        <li>新增「打開 URL」，輸入選上一個「文字」。不要直接打開 Google 的網址。</li>
+      </ol>
+    </div>
     <button class="btn btn-shortcut btn-full" onclick="copyShortcutTemplate()">複製捷徑網址格式</button>
     <div class="shortcut-code" id="shortcutTemplate">https://dancil223-liu.github.io/google-to-amap/#捷徑輸入的GoogleMaps網址</div>
-    <div class="desktop-note">電腦測試請貼 Google Maps 完整網址，解析後按「高德網頁導航」。電腦通常不會開高德 APP，這是正常的。</div>
+    <div class="desktop-note">電腦測試請貼 Google Maps 完整網址，解析後按「查看地圖」或「高德網頁導航」。高德官方網頁若顯示舊版是高德自己的頁面，新版按了空白時直接關掉那個分頁即可。</div>
   </div>
 
   <div class="card result" id="result">
@@ -319,9 +342,9 @@
       <br><br>
       <strong>捷徑最快流程</strong><br>
       1. 捷徑接收 Google Maps 分享網址<br>
-      2. 如果是短網址，先用「取得 URL 內容」或「展開 URL」取得完整網址<br>
-      3. 用「打開 URL」開啟：本站網址 + # + 完整 Google Maps 網址<br>
-      4. 頁面會顯示大按鈕；若 iOS 允許，點一下直接開高德 APP
+      2. 用「展開 URL」把短網址變完整網址<br>
+      3. 用「文字」組成本站網址 + 展開後網址<br>
+      4. 用「打開 URL」打開上一個文字，不要直接打開 Google 網址
     </div>
   </details>
 
@@ -484,9 +507,19 @@
     function isIOS() {
       return /iPad|iPhone|iPod/.test(navigator.userAgent || '') || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     }
+    function openNewTab(url) {
+      if (!url) return;
+      var opened = window.open(url, '_blank', 'noopener');
+      if (!opened) window.location.href = url;
+    }
     function openAmap(mode) {
       var url = isIOS() ? getAmapShortcutUrl(mode) : getAmapWebUrl(mode);
-      if (url) window.location.href = url;
+      if (!url) return;
+      if (isIOS()) {
+        window.location.href = url;
+      } else {
+        openNewTab(url);
+      }
     }
 
     function openUniversal(mode) {
@@ -495,7 +528,7 @@
     }
     function openAmapWeb(mode) {
       var url = getAmapWebUrl(mode);
-      if (url) window.location.href = url;
+      openNewTab(url);
     }
 
     async function copyShortcutTemplate() {

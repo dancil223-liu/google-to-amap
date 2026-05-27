@@ -38,7 +38,13 @@ const sandbox = {
     platform: 'Win32',
     maxTouchPoints: 0,
   },
-  window: { location: { hash: '', href: '' } },
+  window: {
+    location: { hash: '', href: '' },
+    opened: [],
+    open(url, target, features) {
+      this.opened.push({ url, target, features });
+    },
+  },
 };
 
 vm.createContext(sandbox);
@@ -63,10 +69,11 @@ assert.equal(
 
 assert.equal(sandbox.isIOS(), false);
 sandbox.openAmap('navi');
-assert.equal(
-  sandbox.window.location.href,
-  'https://uri.amap.com/navigation?to=121.564468,25.033964,%E5%8F%B0%E5%8C%97101&src=googleToAmap&coordinate=wgs84&mode=car'
-);
+assert.deepEqual(sandbox.window.opened.pop(), {
+  url: 'https://uri.amap.com/navigation?to=121.564468,25.033964,%E5%8F%B0%E5%8C%97101&src=googleToAmap&coordinate=wgs84&mode=car',
+  target: '_blank',
+  features: 'noopener',
+});
 
 sandbox.navigator.userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)';
 sandbox.window.location.href = '';
@@ -77,8 +84,10 @@ assert.equal(
   'iosamap://navi?sourceApplication=googleToAmap&poiname=%E5%8F%B0%E5%8C%97101&lat=25.033964&lon=121.564468&dev=1&style=0'
 );
 
-assert.ok(html.includes('捷徑直開高德'), 'shortcut instructions should be visible');
+assert.ok(html.includes('手機怎麼用'), 'mobile instructions should be visible');
 assert.ok(html.includes('高德網頁導航'), 'desktop web navigation button should be visible');
 assert.ok(html.includes('展開 URL'), 'shortcut setup steps should mention Expand URL');
+assert.ok(html.includes('不用捷徑'), 'mobile fallback should avoid requiring Shortcuts');
+assert.ok(html.includes('文字動作'), 'shortcut setup should explain the Text action');
 
 console.log('link-builder tests passed');
