@@ -23,10 +23,10 @@ Google Maps 連結轉高德地圖的小工具，主要給 iPhone 捷徑流程使
 
 ## 收工狀態（2026-05-27）
 
-- 最新 commit：`09902c5 Improve iPhone Amap shortcut flow`
+- 本輪功能 commit：`ac9949c Fix desktop fallback and shortcut instructions`
 - Git 狀態：乾淨，已 push 到 GitHub Pages
-- 線上測試網址：`https://dancil223-liu.github.io/google-to-amap/?v=09902c5`
-- 已驗證：`node tests/link-builder.test.cjs` 通過；線上頁面已包含新版文字與 `callnative=1`
+- 線上測試網址：`https://dancil223-liu.github.io/google-to-amap/?v=ac9949c`
+- 已驗證：`node tests/link-builder.test.cjs` 通過；本機 HTTP 載入檢查通過；線上頁面已包含「高德網頁導航」、`isIOS` 判斷與捷徑 4 步驟。
 
 ## 下一步
 
