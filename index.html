@@ -88,6 +88,7 @@
     .btn-full { width: 100%; margin-top: 8px; }
     .btn-view { background: var(--blue); color: #fff; }
     .btn-navi { background: var(--green); color: #fff; }
+    .btn-web { background: #111827; color: #fff; }
     .btn-shortcut { background: #111827; color: #fff; }
     .btn:disabled { opacity: 0.4; pointer-events: none; }
 
@@ -166,6 +167,23 @@
       color: #555;
       word-break: break-all;
     }
+    .step-list {
+      margin-top: 12px;
+      padding-left: 20px;
+      font-size: 14px;
+      color: #3A3A3C;
+      line-height: 1.7;
+    }
+    .step-list li { margin-bottom: 6px; }
+    .desktop-note {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      background: #F2F2F7;
+      font-size: 13px;
+      color: #555;
+      line-height: 1.5;
+    }
 
     .name-edit {
       display: flex;
@@ -228,6 +246,7 @@
       <textarea id="input" placeholder="貼上 Google Maps 連結&#10;&#10;例：https://www.google.com/maps/place/台北101/@25.033..."></textarea>
       <div class="btn-row">
         <button class="btn btn-paste" onclick="pasteAndParse()">📋 貼上</button>
+        <button class="btn btn-view" onclick="parseInput(document.getElementById('input').value)">解析</button>
         <button class="btn btn-clear" onclick="clearAll()">清除</button>
       </div>
     </div>
@@ -248,10 +267,17 @@
   <div class="card shortcut-card">
     <div class="title">捷徑直開高德</div>
     <div class="desc">
-      iPhone 捷徑建議用「打開 URL」直接開啟下方連結，比先開 Safari 再跳 APP 更穩。
+      iPhone 不能直接匯入我這邊產生的捷徑檔，所以最穩的做法是你照下面 4 步在「捷徑」APP 裡建立一次。
     </div>
+    <ol class="step-list">
+      <li>新增捷徑，打開右上角設定，開啟「在分享表單中顯示」。</li>
+      <li>第一個動作選「取得捷徑輸入」，類型選 URL。</li>
+      <li>第二個動作選「展開 URL」，輸入用「捷徑輸入」。</li>
+      <li>第三個動作選「打開 URL」，網址填：本站網址 + # + 展開後的 URL。</li>
+    </ol>
     <button class="btn btn-shortcut btn-full" onclick="copyShortcutTemplate()">複製捷徑網址格式</button>
     <div class="shortcut-code" id="shortcutTemplate">https://dancil223-liu.github.io/google-to-amap/#捷徑輸入的GoogleMaps網址</div>
+    <div class="desktop-note">電腦測試請貼 Google Maps 完整網址，解析後按「高德網頁導航」。電腦通常不會開高德 APP，這是正常的。</div>
   </div>
 
   <div class="card result" id="result">
@@ -265,6 +291,7 @@
       <button class="btn btn-view" onclick="openAmap('view')">📍 查看地圖</button>
       <button class="btn btn-navi" onclick="openAmap('navi')">🧭 開始導航</button>
     </div>
+    <button class="btn btn-web btn-full" onclick="openAmapWeb('navi')">電腦測試：高德網頁導航</button>
   </div>
 
   <div class="msg" id="msg"></div>
@@ -454,13 +481,20 @@
         return 'https://uri.amap.com/navigation?to=' + lon + ',' + lat + ',' + n + '&src=googleToAmap&coordinate=wgs84&mode=car';
       }
     }
+    function isIOS() {
+      return /iPad|iPhone|iPod/.test(navigator.userAgent || '') || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    }
     function openAmap(mode) {
-      var url = getAmapShortcutUrl(mode);
+      var url = isIOS() ? getAmapShortcutUrl(mode) : getAmapWebUrl(mode);
       if (url) window.location.href = url;
     }
 
     function openUniversal(mode) {
       var url = getAmapUniversalUrl(mode);
+      if (url) window.location.href = url;
+    }
+    function openAmapWeb(mode) {
+      var url = getAmapWebUrl(mode);
       if (url) window.location.href = url;
     }
 
@@ -472,6 +506,11 @@
       } catch {
         showMsg('無法自動複製，請手動複製下方格式', 'warn');
       }
+    }
+    function escapeHtml(text) {
+      return String(text).replace(/[&<>"']/g, function (ch) {
+        return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
+      });
     }
 
     function manualOpen(mode) {
@@ -513,14 +552,16 @@
         var viewApp = getAmapShortcutUrl('view');
         var naviNativeWeb = getAmapUniversalUrl('navi');
         var naviWeb = getAmapWebUrl('navi');
+        var safeName = escapeHtml(parsed.name);
         document.body.innerHTML =
-          '<div style="display:flex;align-items:center;justify-content:center;height:100dvh;flex-direction:column;gap:16px;padding:20px">' +
-            '<div style="font-size:28px;font-weight:700">' + parsed.name + '</div>' +
+          '<div style="display:flex;align-items:center;justify-content:center;min-height:100dvh;flex-direction:column;gap:14px;padding:20px;text-align:center">' +
+            '<div style="font-size:26px;font-weight:700">' + safeName + '</div>' +
             '<div style="font-size:14px;color:#8E8E93">' + parsed.lat.toFixed(6) + ', ' + parsed.lon.toFixed(6) + '</div>' +
-            '<a href="' + naviApp + '" style="display:block;width:100%;max-width:350px;padding:18px;background:#34C759;color:#fff;text-align:center;border-radius:14px;font-size:20px;font-weight:700;text-decoration:none">🧭 高德 APP 導航</a>' +
-            '<a href="' + naviNativeWeb + '" style="display:block;width:100%;max-width:350px;padding:18px;background:#111827;color:#fff;text-align:center;border-radius:14px;font-size:18px;font-weight:700;text-decoration:none">⚡ 官方連結開 APP</a>' +
-            '<a href="' + viewApp + '" style="display:block;width:100%;max-width:350px;padding:18px;background:#007AFF;color:#fff;text-align:center;border-radius:14px;font-size:18px;font-weight:700;text-decoration:none">📍 在高德查看</a>' +
-            '<a href="' + naviWeb + '" style="display:block;margin-top:8px;font-size:14px;color:#8E8E93;text-decoration:underline">APP 打不開？用網頁版</a>' +
+            '<div style="max-width:350px;font-size:14px;color:#555;line-height:1.5">iPhone 先按第一顆。電腦請直接按最下面的網頁版，電腦不開 APP 是正常的。</div>' +
+            '<a href="' + naviApp + '" style="display:block;width:100%;max-width:350px;padding:18px;background:#34C759;color:#fff;text-align:center;border-radius:14px;font-size:20px;font-weight:700;text-decoration:none">高德 APP 導航</a>' +
+            '<a href="' + naviNativeWeb + '" style="display:block;width:100%;max-width:350px;padding:18px;background:#111827;color:#fff;text-align:center;border-radius:14px;font-size:18px;font-weight:700;text-decoration:none">官方連結開 APP</a>' +
+            '<a href="' + viewApp + '" style="display:block;width:100%;max-width:350px;padding:18px;background:#007AFF;color:#fff;text-align:center;border-radius:14px;font-size:18px;font-weight:700;text-decoration:none">在高德查看</a>' +
+            '<a href="' + naviWeb + '" style="display:block;width:100%;max-width:350px;padding:14px;background:#E5E5EA;color:#1C1C1E;text-align:center;border-radius:14px;font-size:16px;font-weight:700;text-decoration:none">電腦 / APP 打不開：用網頁版</a>' +
           '</div>';
       }
     })();

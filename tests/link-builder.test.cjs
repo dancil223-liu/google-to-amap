@@ -32,7 +32,12 @@ const sandbox = {
     getElementById: element,
     querySelectorAll: () => [],
   },
-  navigator: { clipboard: { readText: async () => '' } },
+  navigator: {
+    clipboard: { readText: async () => '' },
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+    platform: 'Win32',
+    maxTouchPoints: 0,
+  },
   window: { location: { hash: '', href: '' } },
 };
 
@@ -51,6 +56,29 @@ assert.equal(
   'https://uri.amap.com/navigation?to=121.564468,25.033964,%E5%8F%B0%E5%8C%97101&src=googleToAmap&coordinate=wgs84&mode=car&callnative=1'
 );
 
+assert.equal(
+  sandbox.getAmapWebUrl('navi'),
+  'https://uri.amap.com/navigation?to=121.564468,25.033964,%E5%8F%B0%E5%8C%97101&src=googleToAmap&coordinate=wgs84&mode=car'
+);
+
+assert.equal(sandbox.isIOS(), false);
+sandbox.openAmap('navi');
+assert.equal(
+  sandbox.window.location.href,
+  'https://uri.amap.com/navigation?to=121.564468,25.033964,%E5%8F%B0%E5%8C%97101&src=googleToAmap&coordinate=wgs84&mode=car'
+);
+
+sandbox.navigator.userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)';
+sandbox.window.location.href = '';
+assert.equal(sandbox.isIOS(), true);
+sandbox.openAmap('navi');
+assert.equal(
+  sandbox.window.location.href,
+  'iosamap://navi?sourceApplication=googleToAmap&poiname=%E5%8F%B0%E5%8C%97101&lat=25.033964&lon=121.564468&dev=1&style=0'
+);
+
 assert.ok(html.includes('捷徑直開高德'), 'shortcut instructions should be visible');
+assert.ok(html.includes('高德網頁導航'), 'desktop web navigation button should be visible');
+assert.ok(html.includes('展開 URL'), 'shortcut setup steps should mention Expand URL');
 
 console.log('link-builder tests passed');
