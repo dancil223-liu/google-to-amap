@@ -425,21 +425,19 @@
       parsed = null;
     }
 
-    // Auto-redirect mode: iOS Shortcut passes ?url=EXPANDED_URL&name=NAME&mode=view|navi
+    // Auto-redirect: iOS Shortcut passes the Google Maps URL after #
+    // Format: https://site/#GOOGLE_MAPS_EXPANDED_URL
+    // Using hash avoids & encoding issues that break query parameters
     (function autoRedirect() {
-      var params = new URLSearchParams(window.location.search);
-      var url = params.get('url');
-      if (!url) return;
+      var hash = window.location.hash;
+      if (!hash || hash.length < 2) return;
 
-      var name = params.get('name') || '';
-      var mode = params.get('mode') || 'navi';
-
-      parseInput(decodeURIComponent(url));
+      var gmapUrl = decodeURIComponent(hash.slice(1));
+      parseInput(gmapUrl);
 
       if (parsed) {
-        if (name) parsed.name = decodeURIComponent(name);
         document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100dvh;flex-direction:column;gap:12px"><div style="font-size:24px;font-weight:700">正在開啟高德地圖...</div><div style="color:#8E8E93">' + parsed.name + '</div></div>';
-        setTimeout(function() { openAmap(mode); }, 300);
+        setTimeout(function() { openAmap('navi'); }, 300);
       }
     })();
   </script>
