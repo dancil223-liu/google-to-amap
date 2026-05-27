@@ -88,6 +88,7 @@
     .btn-full { width: 100%; margin-top: 8px; }
     .btn-view { background: var(--blue); color: #fff; }
     .btn-navi { background: var(--green); color: #fff; }
+    .btn-shortcut { background: #111827; color: #fff; }
     .btn:disabled { opacity: 0.4; pointer-events: none; }
 
     .result {
@@ -143,6 +144,28 @@
       line-height: 1.8;
     }
     .help .steps strong { color: var(--text); }
+    .shortcut-card {
+      border: 2px solid #111827;
+    }
+    .shortcut-card .title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .shortcut-card .desc {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.6;
+    }
+    .shortcut-code {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      background: #F9F9FB;
+      font-size: 13px;
+      color: #555;
+      word-break: break-all;
+    }
 
     .name-edit {
       display: flex;
@@ -222,6 +245,15 @@
     </div>
   </div>
 
+  <div class="card shortcut-card">
+    <div class="title">捷徑直開高德</div>
+    <div class="desc">
+      iPhone 捷徑建議用「打開 URL」直接開啟下方連結，比先開 Safari 再跳 APP 更穩。
+    </div>
+    <button class="btn btn-shortcut btn-full" onclick="copyShortcutTemplate()">複製捷徑網址格式</button>
+    <div class="shortcut-code" id="shortcutTemplate">https://dancil223-liu.github.io/google-to-amap/#捷徑輸入的GoogleMaps網址</div>
+  </div>
+
   <div class="card result" id="result">
     <div class="name" id="rName"></div>
     <div class="coords" id="rCoords"></div>
@@ -257,6 +289,12 @@
       · 請從瀏覽器網址列複製完整連結<br>
       · 或在 Google Maps APP 長按座標複製<br>
       · 需要已安裝高德地圖 APP
+      <br><br>
+      <strong>捷徑最快流程</strong><br>
+      1. 捷徑接收 Google Maps 分享網址<br>
+      2. 如果是短網址，先用「取得 URL 內容」或「展開 URL」取得完整網址<br>
+      3. 用「打開 URL」開啟：本站網址 + # + 完整 Google Maps 網址<br>
+      4. 頁面會顯示大按鈕；若 iOS 允許，點一下直接開高德 APP
     </div>
   </details>
 
@@ -383,7 +421,7 @@
       }
     }
 
-    function getAmapUrl(mode) {
+    function getAmapShortcutUrl(mode) {
       if (!parsed) return '';
       var lat = parsed.lat, lon = parsed.lon, name = parsed.name;
       var n = encodeURIComponent(name);
@@ -391,6 +429,19 @@
         return 'iosamap://viewMap?sourceApplication=googleToAmap&poiname=' + n + '&lat=' + lat + '&lon=' + lon + '&dev=1';
       } else {
         return 'iosamap://navi?sourceApplication=googleToAmap&poiname=' + n + '&lat=' + lat + '&lon=' + lon + '&dev=1&style=0';
+      }
+    }
+    function getAmapUrl(mode) {
+      return getAmapShortcutUrl(mode);
+    }
+    function getAmapUniversalUrl(mode) {
+      if (!parsed) return '';
+      var lat = parsed.lat, lon = parsed.lon, name = parsed.name;
+      var n = encodeURIComponent(name);
+      if (mode === 'view') {
+        return 'https://uri.amap.com/marker?position=' + lon + ',' + lat + '&name=' + n + '&src=googleToAmap&coordinate=wgs84&callnative=1';
+      } else {
+        return 'https://uri.amap.com/navigation?to=' + lon + ',' + lat + ',' + n + '&src=googleToAmap&coordinate=wgs84&mode=car&callnative=1';
       }
     }
     function getAmapWebUrl(mode) {
@@ -404,8 +455,23 @@
       }
     }
     function openAmap(mode) {
-      var url = getAmapUrl(mode);
+      var url = getAmapShortcutUrl(mode);
       if (url) window.location.href = url;
+    }
+
+    function openUniversal(mode) {
+      var url = getAmapUniversalUrl(mode);
+      if (url) window.location.href = url;
+    }
+
+    async function copyShortcutTemplate() {
+      var text = 'https://dancil223-liu.github.io/google-to-amap/#' + encodeURIComponent('捷徑輸入的GoogleMaps網址');
+      try {
+        await navigator.clipboard.writeText(text);
+        showMsg('已複製捷徑網址格式', 'warn');
+      } catch {
+        showMsg('無法自動複製，請手動複製下方格式', 'warn');
+      }
     }
 
     function manualOpen(mode) {
@@ -443,15 +509,17 @@
       parseInput(gmapUrl);
 
       if (parsed) {
-        var naviApp = getAmapUrl('navi');
-        var viewApp = getAmapUrl('view');
+        var naviApp = getAmapShortcutUrl('navi');
+        var viewApp = getAmapShortcutUrl('view');
+        var naviNativeWeb = getAmapUniversalUrl('navi');
         var naviWeb = getAmapWebUrl('navi');
         document.body.innerHTML =
           '<div style="display:flex;align-items:center;justify-content:center;height:100dvh;flex-direction:column;gap:16px;padding:20px">' +
             '<div style="font-size:28px;font-weight:700">' + parsed.name + '</div>' +
             '<div style="font-size:14px;color:#8E8E93">' + parsed.lat.toFixed(6) + ', ' + parsed.lon.toFixed(6) + '</div>' +
-            '<a href="' + naviApp + '" style="display:block;width:100%;max-width:350px;padding:18px;background:#34C759;color:#fff;text-align:center;border-radius:14px;font-size:20px;font-weight:700;text-decoration:none">🧭 開啟高德導航</a>' +
-            '<a href="' + viewApp + '" style="display:block;width:100%;max-width:350px;padding:18px;background:#007AFF;color:#fff;text-align:center;border-radius:14px;font-size:20px;font-weight:700;text-decoration:none">📍 在高德查看地圖</a>' +
+            '<a href="' + naviApp + '" style="display:block;width:100%;max-width:350px;padding:18px;background:#34C759;color:#fff;text-align:center;border-radius:14px;font-size:20px;font-weight:700;text-decoration:none">🧭 高德 APP 導航</a>' +
+            '<a href="' + naviNativeWeb + '" style="display:block;width:100%;max-width:350px;padding:18px;background:#111827;color:#fff;text-align:center;border-radius:14px;font-size:18px;font-weight:700;text-decoration:none">⚡ 官方連結開 APP</a>' +
+            '<a href="' + viewApp + '" style="display:block;width:100%;max-width:350px;padding:18px;background:#007AFF;color:#fff;text-align:center;border-radius:14px;font-size:18px;font-weight:700;text-decoration:none">📍 在高德查看</a>' +
             '<a href="' + naviWeb + '" style="display:block;margin-top:8px;font-size:14px;color:#8E8E93;text-decoration:underline">APP 打不開？用網頁版</a>' +
           '</div>';
       }
