@@ -383,17 +383,29 @@
       }
     }
 
-    function openAmap(mode) {
-      if (!parsed) return;
-      const { lat, lon, name } = parsed;
-      const n = encodeURIComponent(name);
-      var url;
+    function getAmapUrl(mode) {
+      if (!parsed) return '';
+      var lat = parsed.lat, lon = parsed.lon, name = parsed.name;
+      var n = encodeURIComponent(name);
       if (mode === 'view') {
-        url = 'https://uri.amap.com/marker?position=' + lon + ',' + lat + '&name=' + n + '&src=googleToAmap&coordinate=wgs84';
+        return 'iosamap://viewMap?sourceApplication=googleToAmap&poiname=' + n + '&lat=' + lat + '&lon=' + lon + '&dev=1';
       } else {
-        url = 'https://uri.amap.com/navigation?to=' + lon + ',' + lat + ',' + n + '&src=googleToAmap&coordinate=wgs84&mode=car';
+        return 'iosamap://navi?sourceApplication=googleToAmap&poiname=' + n + '&lat=' + lat + '&lon=' + lon + '&dev=1&style=0';
       }
-      window.location.href = url;
+    }
+    function getAmapWebUrl(mode) {
+      if (!parsed) return '';
+      var lat = parsed.lat, lon = parsed.lon, name = parsed.name;
+      var n = encodeURIComponent(name);
+      if (mode === 'view') {
+        return 'https://uri.amap.com/marker?position=' + lon + ',' + lat + '&name=' + n + '&src=googleToAmap&coordinate=wgs84';
+      } else {
+        return 'https://uri.amap.com/navigation?to=' + lon + ',' + lat + ',' + n + '&src=googleToAmap&coordinate=wgs84&mode=car';
+      }
+    }
+    function openAmap(mode) {
+      var url = getAmapUrl(mode);
+      if (url) window.location.href = url;
     }
 
     function manualOpen(mode) {
@@ -422,9 +434,7 @@
       parsed = null;
     }
 
-    // Auto-redirect: iOS Shortcut passes the Google Maps URL after #
-    // Format: https://site/#GOOGLE_MAPS_EXPANDED_URL
-    // Using hash avoids & encoding issues that break query parameters
+    // iOS Shortcut passes the Google Maps URL after #
     (function autoRedirect() {
       var hash = window.location.hash;
       if (!hash || hash.length < 2) return;
@@ -433,8 +443,17 @@
       parseInput(gmapUrl);
 
       if (parsed) {
-        document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100dvh;flex-direction:column;gap:12px"><div style="font-size:24px;font-weight:700">正在開啟高德地圖...</div><div style="color:#8E8E93">' + parsed.name + '</div></div>';
-        setTimeout(function() { openAmap('navi'); }, 300);
+        var naviApp = getAmapUrl('navi');
+        var viewApp = getAmapUrl('view');
+        var naviWeb = getAmapWebUrl('navi');
+        document.body.innerHTML =
+          '<div style="display:flex;align-items:center;justify-content:center;height:100dvh;flex-direction:column;gap:16px;padding:20px">' +
+            '<div style="font-size:28px;font-weight:700">' + parsed.name + '</div>' +
+            '<div style="font-size:14px;color:#8E8E93">' + parsed.lat.toFixed(6) + ', ' + parsed.lon.toFixed(6) + '</div>' +
+            '<a href="' + naviApp + '" style="display:block;width:100%;max-width:350px;padding:18px;background:#34C759;color:#fff;text-align:center;border-radius:14px;font-size:20px;font-weight:700;text-decoration:none">🧭 開啟高德導航</a>' +
+            '<a href="' + viewApp + '" style="display:block;width:100%;max-width:350px;padding:18px;background:#007AFF;color:#fff;text-align:center;border-radius:14px;font-size:20px;font-weight:700;text-decoration:none">📍 在高德查看地圖</a>' +
+            '<a href="' + naviWeb + '" style="display:block;margin-top:8px;font-size:14px;color:#8E8E93;text-decoration:underline">APP 打不開？用網頁版</a>' +
+          '</div>';
       }
     })();
   </script>
