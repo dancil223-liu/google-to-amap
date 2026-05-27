@@ -25,9 +25,10 @@ Google Maps 連結轉高德地圖的小工具，主要給 iPhone 捷徑流程使
 
 ## 收工狀態（2026-05-27）
 
-- 上次線上 commit：`d104830 Update handoff for shortcut fallback fix`
-- 本輪自動跳轉修正待提交與 push。
-- 已驗證：`node tests/link-builder.test.cjs` 通過；本機 HTTP 載入檢查通過。
+- 本輪功能 commit：`e31d0be Auto-open Amap from shortcut page`
+- Git 狀態：功能修正已 push 到 GitHub Pages。
+- 線上測試網址：`https://dancil223-liu.github.io/google-to-amap/?v=e31d0be`
+- 已驗證：`node tests/link-builder.test.cjs` 通過；本機 HTTP 載入檢查通過；線上頁面已包含 `autoOpenShortcutTarget`、「正在嘗試打開高德」與手動備援按鈕。
 
 ## 下一步
 
