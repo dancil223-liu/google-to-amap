@@ -387,16 +387,13 @@
       if (!parsed) return;
       const { lat, lon, name } = parsed;
       const n = encodeURIComponent(name);
-      let url;
+      var url;
       if (mode === 'view') {
-        url = 'iosamap://viewMap?sourceApplication=googleToAmap&poiname=' + n + '&lat=' + lat + '&lon=' + lon + '&dev=1';
+        url = 'https://uri.amap.com/marker?position=' + lon + ',' + lat + '&name=' + n + '&src=googleToAmap&coordinate=wgs84';
       } else {
-        url = 'iosamap://navi?sourceApplication=googleToAmap&poiname=' + n + '&lat=' + lat + '&lon=' + lon + '&dev=1&style=0';
+        url = 'https://uri.amap.com/navigation?to=' + lon + ',' + lat + ',' + n + '&src=googleToAmap&coordinate=wgs84&mode=car';
       }
       window.location.href = url;
-      setTimeout(function () {
-        showMsg('無法開啟高德地圖，請確認已安裝高德地圖 APP', 'error');
-      }, 2500);
     }
 
     function manualOpen(mode) {
