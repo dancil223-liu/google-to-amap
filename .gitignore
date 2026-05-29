@@ -1,0 +1,41 @@
+# 敏感資料
+.env
+.env.local
+.env*.local
+*.key
+credentials.*
+secrets.*
+*.pem
+
+# Codex / Claude 本機設定
+.codex/
+.Codex/
+.claude/
+
+# Node.js
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# 編譯 / 暫存輸出
+dist/
+build/
+.next/
+out/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Google Drive / OS
+desktop.ini
+*.tmp
+~$*
+.DS_Store
+
+# Netlify
+.netlify/

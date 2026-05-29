@@ -2,12 +2,12 @@
 
 ## 專案摘要
 
-這是 Google Maps → 高德地圖轉換工具。
+這是 Google Maps → 高德地圖的 iPhone 捷徑實驗專案。
 
 - 本地路徑：`G:\我的雲端硬碟\AI-Workspace\高德轉換器`
 - Obsidian 日誌：`G:\我的雲端硬碟\secondbrain\開發日誌\高德轉換器.md`
 - GitHub repo：`dancil223-liu/google-to-amap`
-- GitHub Pages：`https://dancil223-liu.github.io/google-to-amap/`
+- 狀態：網頁版已放棄，改走純 iPhone 捷徑，尚未完成穩定版。
 
 ## 小利開工
 
@@ -17,9 +17,9 @@
 
 ## 注意事項
 
-- 這是純前端單頁工具，入口是 `index.html`。
-- 高德 APP 直開主路徑是 `iosamap://navi`；備援路徑是 `https://uri.amap.com/navigation?...&callnative=1`。
-- 修改後至少用瀏覽器開本地頁面確認主要流程。
-- 修改連結格式後要跑 `node tests/link-builder.test.cjs`。
-- iPhone / Safari / 高德 APP 開啟行為需要實機確認。
+- 不再維護 `index.html` / GitHub Pages 網頁轉換工具。
+- 目前主要研究 iPhone 捷徑：Google Maps 分享資料整理後，組 `iosamap://` 打開高德 APP。
+- 已知問題：部分 Google 分享連結只有地址文字，捷徑猜座標可能偏移。
+- 下一步優先測 `iosamap://poi?sourceApplication=GoogleToAmap&name=...` 搜尋版，先不要帶 `lat` / `lon`。
+- iPhone / 高德 APP 行為需要使用者實機確認。
 - 不要 commit `.codex/`、`.claude/`、`.env`、`node_modules/`。
